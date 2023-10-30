@@ -1,0 +1,26 @@
+---
+- name: secure sudo
+  hosts: all,localhost
+  become: true
+  tasks:
+    - name: remove insecure /etc/sudoers.d/axis file
+      file:
+        name: /etc/sudoers.d/axis
+        state: absent
+
+    - name: create new and secure /etc/sudoers.d/axis file
+      copy:
+        content: 'axis ALL=(ALL) ALL'
+        dest: /etc/sudoers.d/axis
+     
+    - name: create new and secure /etc/sudoers.d/axis for Ubuntu
+      copy:
+        content: 'axis ALL=(ALL:ALL) ALL'
+        dest: /etc/sudoers.d/axis
+      when: ansible_distribution == "Ubuntu"
+
+    - name: turning /etc/sudoers.d
+      lineinfile:
+        line: 'Defaults timestamp_type=global,timestamp_timeout=60,!requiretty'
+        name: /etc/sudoers
+        validate: /usr/sbin/visudo -cf %s
